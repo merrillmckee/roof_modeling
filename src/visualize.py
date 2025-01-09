@@ -37,6 +37,9 @@ def visualize_image(img: np.ndarray):
     fig.tight_layout()
     plt.show()
 
+    # cleanup
+    plt.close(fig)
+
 
 def visualize_point_cloud(point_cloud: np.ndarray):
     """
@@ -56,6 +59,9 @@ def visualize_point_cloud(point_cloud: np.ndarray):
     ax.axis('off')
     fig.tight_layout()
     plt.show()
+
+    # cleanup
+    plt.close(fig)
 
 
 def visualize_2d_features_image_overlay(
