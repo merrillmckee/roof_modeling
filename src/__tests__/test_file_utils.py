@@ -2,7 +2,7 @@ from pathlib import Path
 from src.file_utils import read_image, read_ply
 from visualize import visualize_image, visualize_point_cloud
 
-VISUALIZE = True
+VISUALIZE = False
 
 
 def test_read_image():
