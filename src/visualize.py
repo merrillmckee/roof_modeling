@@ -96,7 +96,7 @@ def visualize_2d_features_image_overlay(
         xys = []
         for v in face:
             xys.append(to_tuple(vertices[v, :]))
-        pencil.polygon(xy=xys, fill=tuple(COLORS[i%F] + [alpha]))  # very transparent yellow
+        pencil.polygon(xy=xys, fill=tuple(COLORS[i%F] + [alpha]))  # changing transparent colors
 
     # display
     p_img.show()
