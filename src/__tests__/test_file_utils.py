@@ -1,5 +1,8 @@
 from pathlib import Path
 from src.file_utils import read_image
+from visualize import visualize_image
+
+VISUALIZE = True
 
 
 def test_read_image():
@@ -10,3 +13,6 @@ def test_read_image():
 
     assert len(img.shape) == 3  # RGB
     assert img.shape[2] == 3  # HxWx3
+
+    if VISUALIZE:
+        visualize_image(img)
