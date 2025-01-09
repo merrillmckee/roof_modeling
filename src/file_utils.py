@@ -61,7 +61,7 @@ def read_ply(data_path: Path, uid: str) -> np.ndarray:
     return point_cloud
 
 
-def read_metadata(data_path: Path, uid: str) -> tuple[np.ndarray, np.ndarray, list[list[int]]]:
+def read_metadata(data_path: Path, uid: str) -> tuple[np.ndarray, np.ndarray, list[list[int]], float]:
     """
     Read 2D vertices, edges, and faces (polygons) from metadata file
     """
@@ -73,4 +73,5 @@ def read_metadata(data_path: Path, uid: str) -> tuple[np.ndarray, np.ndarray, li
     vertices = np.array(data['vertices'])
     edges = np.array(data['edges'])
     faces = data['faces']
-    return vertices, edges, faces
+    ppm = data['pixels_per_meter']
+    return vertices, edges, faces, ppm

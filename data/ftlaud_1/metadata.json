@@ -1,4 +1,5 @@
 {
+  "pixels_per_meter": 10.0,
   "vertices": [
     [172, 315],
     [280, 315],

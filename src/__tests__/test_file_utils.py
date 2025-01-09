@@ -37,11 +37,12 @@ def test_read_metadata():
     data_path = Path('/Users/merrillmck/source/github/roof_modeling/data')
     uid = "ftlaud_1"
     img = read_image(data_path, uid)
-    vertices, edges, faces = read_metadata(data_path, uid)
+    vertices, edges, faces, ppm = read_metadata(data_path, uid)
 
     assert isinstance(vertices, np.ndarray)
     assert isinstance(edges, np.ndarray)
     assert isinstance(faces, list)
+    assert isinstance(ppm, float)
 
     if VISUALIZE:
         visualize_2d_features_image_overlay(img, vertices, edges, faces)
