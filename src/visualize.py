@@ -1,7 +1,9 @@
 import matplotlib
+import matplotlib.colors as mp_colors
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image, ImageDraw
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 matplotlib.use('MacOSX')
 
@@ -41,7 +43,11 @@ def visualize_image(img: np.ndarray):
     plt.close(fig)
 
 
-def visualize_point_cloud(point_cloud: np.ndarray):
+def visualize_point_cloud(
+        point_cloud: np.ndarray,
+        polygon_2d: np.ndarray = None,
+        plane: tuple[float, float, float, float] = None,
+):
     """
     Visualize a 3D point cloud with matplotlib
 
@@ -54,7 +60,23 @@ def visualize_point_cloud(point_cloud: np.ndarray):
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
+
+    # points
     ax.scatter(x, y, z, c=colors)
+
+    # 2D polygon
+    if polygon_2d is not None:
+        if plane is None:
+            poly_z_values = np.zeros(len(polygon_2d))
+        else:
+            a, b, c, d = plane  # 3D plane equation:  ax + by + cz + d = 0
+            x, y = polygon_2d[:, 0], polygon_2d[:, 1]
+            poly_z_values = (a * x + b * y + d) / -c
+        polygon = Poly3DCollection([np.column_stack((polygon_2d, poly_z_values))], alpha=0.2)
+        polygon.set_color(mp_colors.rgb2hex([x / 255.0 for x in [0, 255, 255]]))  # cyan
+        ax.add_collection3d(polygon)
+
+    # figure settings
     ax.axis('equal')
     ax.axis('off')
     fig.tight_layout()

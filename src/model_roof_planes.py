@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import path as Polygon
+from open3d import geometry, utility
 from pathlib import Path
 
 from file_utils import read_image, read_metadata, read_ply
@@ -48,10 +49,15 @@ def model_roof_planes(
 ) -> list[tuple[float, float, float, float]]:
 
     for face in faces:
-        face_points = lasso_points(vertices[face, :], point_cloud)
+        face_polygon = vertices[face, :]
+        face_points = lasso_points(face_polygon, point_cloud)
+
+        face_points_o3d = geometry.PointCloud()
+        face_points_o3d.points = utility.Vector3dVector(face_points[:, :3])
+        plane, inliers = face_points_o3d.segment_plane(distance_threshold=0.2, ransac_n=3, num_iterations=500)
 
         # DEBUG: visualize point cloud points within a single face polygon
-        visualize_point_cloud(face_points)
+        visualize_point_cloud(face_points, polygon_2d=face_polygon, plane=plane)
 
 
 if __name__ == "__main__":
@@ -59,7 +65,7 @@ if __name__ == "__main__":
     data_path = Path('/Users/merrillmck/source/github/roof_modeling/data')
     uid = "ftlaud_1"
 
-    # read data from file
+    # read data from files
     img_ = read_image(data_path, uid)
     point_cloud_ = read_ply(data_path, uid)
     vertices_pixels_, _, faces_, ppm_ = read_metadata(data_path, uid)

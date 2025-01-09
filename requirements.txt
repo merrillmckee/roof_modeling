@@ -1,5 +1,6 @@
 matplotlib
 numpy
+open3d
 pillow
 plyfile
 pytest
