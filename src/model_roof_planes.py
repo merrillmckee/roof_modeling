@@ -31,6 +31,16 @@ def image_to_world(vertices_pixels: np.ndarray, ppm: float, image_shape: tuple[i
     return vertices_meters
 
 
+def lasso_points(face_polygon: np.ndarray, point_cloud: np.ndarray) -> np.ndarray:
+    """
+    Lasso 3D points with a 2D polygon
+    """
+    polygon_path = Polygon.Path(vertices=face_polygon)
+    points_mask = polygon_path.contains_points(point_cloud[:, :2], radius=0.0)
+    interior_points = point_cloud[points_mask, :]
+    return interior_points
+
+
 def model_roof_planes(
         point_cloud: np.ndarray,
         vertices: np.ndarray,
@@ -38,10 +48,7 @@ def model_roof_planes(
 ) -> list[tuple[float, float, float, float]]:
 
     for face in faces:
-        face_polygon = vertices[face, :]
-        polygon_path = Polygon.Path(vertices=face_polygon)
-        points_mask = polygon_path.contains_points(point_cloud[:, :2], radius=0.0)
-        face_points = point_cloud[points_mask, :]
+        face_points = lasso_points(vertices[face, :], point_cloud)
 
         # DEBUG: visualize point cloud points within a single face polygon
         visualize_point_cloud(face_points)
@@ -53,10 +60,10 @@ if __name__ == "__main__":
     uid = "ftlaud_1"
 
     # read data from file
-    img = read_image(data_path, uid)
-    point_cloud = read_ply(data_path, uid)
-    vertices_pixels, _, faces, ppm = read_metadata(data_path, uid)
-    vertices = image_to_world(vertices_pixels, ppm, img.shape[:2])
+    img_ = read_image(data_path, uid)
+    point_cloud_ = read_ply(data_path, uid)
+    vertices_pixels_, _, faces_, ppm_ = read_metadata(data_path, uid)
+    vertices_ = image_to_world(vertices_pixels_, ppm_, img_.shape[:2])
 
     # model
-    roof_planes = model_roof_planes(point_cloud, vertices, faces)
+    roof_planes_ = model_roof_planes(point_cloud_, vertices_, faces_)
