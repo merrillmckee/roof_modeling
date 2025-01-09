@@ -6,6 +6,19 @@ from PIL import Image, ImageDraw
 matplotlib.use('MacOSX')
 
 
+COLORS = [
+    [0, 255, 255],  # cyan
+    [255, 0, 255],  # magenta
+    [255, 0, 0],    # red
+    [0, 255, 0],    # green
+    [0, 0, 255],    # blue
+    [160, 32, 255], # purple
+    [96, 255, 128], # yellow-green
+    [255, 160, 16], # orange
+    [255, 208, 160], # pale pink
+]
+
+
 def to_tuple(arr: np.ndarray) -> tuple:
     """
     Helper to convert an array to tuple since Pillow likes tuple inputs
@@ -71,11 +84,13 @@ def visualize_2d_features_image_overlay(
         pencil.line(xy=[xy_1, xy_2], fill="yellow", width=0)
 
     # faces
-    for face in faces:
+    alpha = 60
+    F = len(COLORS)
+    for i, face in enumerate(faces):
         xys = []
         for v in face:
             xys.append(to_tuple(vertices[v, :]))
-        pencil.polygon(xy=xys, fill=(255, 255, 0, 80))  # very transparent yellow
+        pencil.polygon(xy=xys, fill=tuple(COLORS[i%F] + [alpha]))  # very transparent yellow
 
     # display
     p_img.show()
