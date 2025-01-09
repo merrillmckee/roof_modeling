@@ -1,8 +1,16 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from PIL import Image, ImageDraw
 
 matplotlib.use('MacOSX')
+
+
+def to_tuple(arr: np.ndarray) -> tuple:
+    """
+    Helper to convert an array to tuple since Pillow likes tuple inputs
+    """
+    return tuple(arr.tolist())
 
 
 def visualize_image(img: np.ndarray):
@@ -35,3 +43,42 @@ def visualize_point_cloud(point_cloud: np.ndarray):
     ax.axis('off')
     fig.tight_layout()
     plt.show()
+
+
+def visualize_2d_features_image_overlay(
+        img: np.ndarray,
+        vertices: np.ndarray,
+        edges: np.ndarray,
+        faces: list[list[int]],
+):
+    """
+    Visualize 2D features overlaid onto an image with Pillow
+    """
+    radius = 10  # pixels
+    p_img = Image.fromarray(img)
+    pencil = ImageDraw.Draw(p_img, mode="RGBA")
+
+    # vertices
+    for v in vertices:
+        xy_1 = to_tuple(v - radius)
+        xy_2 = to_tuple(v + radius)
+        pencil.ellipse(xy=[xy_1, xy_2], fill=None, outline="yellow", width=1)
+
+    # edges
+    for e in edges:
+        xy_1 = to_tuple(vertices[e[0], :])
+        xy_2 = to_tuple(vertices[e[1], :])
+        pencil.line(xy=[xy_1, xy_2], fill="yellow", width=0)
+
+    # faces
+    for face in faces:
+        xys = []
+        for v in face:
+            xys.append(to_tuple(vertices[v, :]))
+        pencil.polygon(xy=xys, fill=(255, 255, 0, 80))  # very transparent yellow
+
+    # display
+    p_img.show()
+
+    # cleanup
+    p_img.close()

@@ -1,3 +1,4 @@
+import json
 import numpy as np
 from pathlib import Path
 from PIL import Image
@@ -13,6 +14,9 @@ from plyfile import PlyData
 
 
 def read_image(data_path: Path, uid: str) -> np.ndarray:
+    """
+    Read aerial image
+    """
 
     img_path = Path(data_path) / uid / "ortho.png"
 
@@ -31,6 +35,9 @@ def read_image(data_path: Path, uid: str) -> np.ndarray:
 
 
 def read_ply(data_path: Path, uid: str) -> np.ndarray:
+    """
+    Read 3D dsm / point cloud
+    """
 
     ply_path = Path(data_path) / uid / "dsm.ply"
 
@@ -52,3 +59,18 @@ def read_ply(data_path: Path, uid: str) -> np.ndarray:
         return
 
     return point_cloud
+
+
+def read_metadata(data_path: Path, uid: str) -> tuple[np.ndarray, np.ndarray, list[list[int]]]:
+    """
+    Read 2D vertices, edges, and faces (polygons) from metadata file
+    """
+    json_path = Path(data_path) / uid / "metadata.json"
+
+    with open(json_path, 'r') as fp:
+        data = json.load(fp)
+
+    vertices = np.array(data['vertices'])
+    edges = np.array(data['edges'])
+    faces = data['faces']
+    return vertices, edges, faces
