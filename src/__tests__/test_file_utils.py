@@ -1,6 +1,6 @@
 from pathlib import Path
 from src.file_utils import read_image, read_ply
-from visualize import visualize_image
+from visualize import visualize_image, visualize_point_cloud
 
 VISUALIZE = True
 
@@ -28,5 +28,4 @@ def test_read_ply():
     assert point_cloud.shape[1] == 9  # 9 features
 
     if VISUALIZE:
-        pass
-        # visualize_point_cloud(point_cloud)
+        visualize_point_cloud(point_cloud)
