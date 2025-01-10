@@ -1,5 +1,5 @@
 import numpy as np
-from matplotlib import path as Polygon
+from matplotlib import path as mpl_polygon
 from open3d import geometry, utility
 from pathlib import Path
 
@@ -36,10 +36,24 @@ def lasso_points(face_polygon: np.ndarray, point_cloud: np.ndarray) -> np.ndarra
     """
     Lasso 3D points with a 2D polygon
     """
-    polygon_path = Polygon.Path(vertices=face_polygon)
+    polygon_path = mpl_polygon.Path(vertices=face_polygon)
     points_mask = polygon_path.contains_points(point_cloud[:, :2], radius=0.0)
     interior_points = point_cloud[points_mask, :]
     return interior_points
+
+
+def detect_plane_ransac(points: np.ndarray) -> tuple[float, float, float, float]:
+    """
+    Detect 3D plane equation given a set of 3D points. Use RANSAC to separate outliers.
+
+    Returns tuple (a, b, c, d) where ax + by + cz + d = 0 is the 3D equation of a plane.
+    """
+    face_points_o3d = geometry.PointCloud()
+    face_points_o3d.points = utility.Vector3dVector(points)
+
+    # get plane with RANSAC using open3d utility
+    plane, inliers = face_points_o3d.segment_plane(distance_threshold=0.2, ransac_n=3, num_iterations=500)
+    return tuple(plane.tolist())
 
 
 def model_roof_planes(
@@ -52,12 +66,10 @@ def model_roof_planes(
         face_polygon = vertices[face, :]
         face_points = lasso_points(face_polygon, point_cloud)
 
-        face_points_o3d = geometry.PointCloud()
-        face_points_o3d.points = utility.Vector3dVector(face_points[:, :3])
-        plane, inliers = face_points_o3d.segment_plane(distance_threshold=0.2, ransac_n=3, num_iterations=500)
+        plane_ransac = detect_plane_ransac(face_points[:, :3])
 
         # DEBUG: visualize point cloud points within a single face polygon
-        visualize_point_cloud(face_points, polygon_2d=face_polygon, plane=plane)
+        visualize_point_cloud(face_points, polygon_2d=face_polygon, plane=plane_ransac)
 
 
 if __name__ == "__main__":
