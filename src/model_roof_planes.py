@@ -7,14 +7,6 @@ from file_utils import read_image, read_metadata, read_ply
 from visualize import visualize_point_cloud
 
 
-def get_face_points(face: list[int], vertices: np.ndarray) -> np.ndarray:
-    """
-    Helper function to get face/polygon points as a 2D array of xy coordinates
-    """
-    face_points = vertices[face, :]
-    return face_points
-
-
 def image_to_world(vertices_pixels: np.ndarray, ppm: float, image_shape: tuple[int, int]) -> np.ndarray:
     """
     Helper function to convert xy image coordinates in pixels to xy world coordinates in the point cloud
@@ -53,6 +45,12 @@ def detect_plane_ransac(points: np.ndarray) -> tuple[float, float, float, float]
 
     # get plane with RANSAC using open3d utility
     plane, inliers = face_points_o3d.segment_plane(distance_threshold=0.2, ransac_n=3, num_iterations=500)
+
+    # ensure the plane coefficients have a positive 'c'; this means normals point up
+    c = plane[2]
+    if c != 0:
+        plane /= np.sign(c)
+
     return tuple(plane.tolist())
 
 
