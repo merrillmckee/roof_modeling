@@ -5,6 +5,8 @@ import numpy as np
 from PIL import Image, ImageDraw
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
+from point_cloud_utils import lasso_points
+
 matplotlib.use('MacOSX')
 
 
@@ -116,6 +118,52 @@ def visualize_point_cloud(
         polygon = Poly3DCollection([np.column_stack((polygon_2d, poly_z_values))], alpha=0.2)
         polygon.set_color(mp_colors.rgb2hex([x / 255.0 for x in [0, 255, 255]]))  # cyan
         ax.add_collection3d(polygon)
+
+    # figure settings
+    ax.axis('equal')
+    ax.axis('off')
+    fig.tight_layout()
+    plt.show()
+
+    # cleanup
+    plt.close(fig)
+
+
+def visualize_roof_model(
+        point_cloud: np.ndarray,
+        polygons_2d: list[np.ndarray],
+        planes: list[tuple[float, float, float, float]],
+):
+    """
+    Visualize a 3D point cloud with matplotlib
+
+    Note: Can be very slow
+    """
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    for polygon_2d, plane in zip(polygons_2d, planes):
+        # face points
+        face_points = lasso_points(polygon_2d, point_cloud)
+        x = face_points[:, 0]
+        y = face_points[:, 1]
+        z = face_points[:, 2]
+        colors = face_points[:, 6:9] / 255.0
+
+        # points
+        # ax.scatter(x, y, z, c=colors)
+
+        # 2D polygon
+        if polygon_2d is not None:
+            if plane is None:
+                poly_z_values = np.zeros(len(polygon_2d))
+            else:
+                a, b, c, d = plane  # 3D plane equation:  ax + by + cz + d = 0
+                x, y = polygon_2d[:, 0], polygon_2d[:, 1]
+                poly_z_values = (a * x + b * y + d) / -c
+            polygon = Poly3DCollection([np.column_stack((polygon_2d, poly_z_values))], alpha=0.2)
+            polygon.set_color(mp_colors.rgb2hex([x / 255.0 for x in [0, 255, 255]]))  # cyan
+            ax.add_collection3d(polygon)
 
     # figure settings
     ax.axis('equal')
