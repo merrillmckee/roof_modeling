@@ -73,14 +73,14 @@ def model_roof_planes(
 
 
 if __name__ == "__main__":
-    # data
-    data_path = Path('/Users/merrillmck/source/github/roof_modeling/data')
-    uid = "ftlaud_1"
+    # data inputs
+    data_path_ = Path('/Users/merrillmck/source/github/roof_modeling/data')
+    uid_ = "ftlaud_1"
 
     # read data from files
-    img_ = read_image(data_path, uid)
-    point_cloud_ = read_ply(data_path, uid)
-    vertices_pixels_, _, faces_, ppm_ = read_metadata(data_path, uid)
+    img_ = read_image(data_path_, uid_)
+    point_cloud_ = read_ply(data_path_, uid_)
+    vertices_pixels_, _, faces_, ppm_ = read_metadata(data_path_, uid_)
     vertices_ = image_to_world(vertices_pixels_, ppm_, img_.shape[:2])
 
     # model
