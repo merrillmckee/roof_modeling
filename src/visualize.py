@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from point_cloud_utils import lasso_points
+from typing import Literal
 
 matplotlib.use('MacOSX')
 
@@ -136,8 +137,6 @@ def visualize_roof_model(
 ):
     """
     Visualize a 3D point cloud with matplotlib
-
-    Note: Can be very slow
     """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -145,21 +144,21 @@ def visualize_roof_model(
     for polygon_2d, plane in zip(polygons_2d, planes):
         # face points
         face_points = lasso_points(polygon_2d, point_cloud)
-        x = face_points[:, 0]
-        y = face_points[:, 1]
-        z = face_points[:, 2]
-        colors = face_points[:, 6:9] / 255.0
 
-        # points
-        # ax.scatter(x, y, z, c=colors)
-
-        # 2D polygon
+        # 2D polygon (turned off for now)
         a, b, c, d = plane  # 3D plane equation:  ax + by + cz + d = 0
         x, y = polygon_2d[:, 0], polygon_2d[:, 1]
         poly_z_values = (a * x + b * y + d) / -c
-        polygon = Poly3DCollection([np.column_stack((polygon_2d, poly_z_values))], alpha=0.5)
+        polygon = Poly3DCollection([np.column_stack((polygon_2d, poly_z_values))], alpha=0.1)
         polygon.set_color(mp_colors.rgb2hex([x / 255.0 for x in [0, 255, 255]]))  # cyan
-        ax.add_collection3d(polygon)
+        # ax.add_collection3d(polygon)
+
+        # points
+        x = face_points[:, 0]
+        y = face_points[:, 1]
+        z = (a * x + b * y + d) / -c
+        colors = face_points[:, 6:9] / 255.0
+        ax.scatter3D(x, y, z, c=colors, s=0.1)
 
     # figure settings
     ax.axis('equal')
