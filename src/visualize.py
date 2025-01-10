@@ -154,16 +154,12 @@ def visualize_roof_model(
         # ax.scatter(x, y, z, c=colors)
 
         # 2D polygon
-        if polygon_2d is not None:
-            if plane is None:
-                poly_z_values = np.zeros(len(polygon_2d))
-            else:
-                a, b, c, d = plane  # 3D plane equation:  ax + by + cz + d = 0
-                x, y = polygon_2d[:, 0], polygon_2d[:, 1]
-                poly_z_values = (a * x + b * y + d) / -c
-            polygon = Poly3DCollection([np.column_stack((polygon_2d, poly_z_values))], alpha=0.2)
-            polygon.set_color(mp_colors.rgb2hex([x / 255.0 for x in [0, 255, 255]]))  # cyan
-            ax.add_collection3d(polygon)
+        a, b, c, d = plane  # 3D plane equation:  ax + by + cz + d = 0
+        x, y = polygon_2d[:, 0], polygon_2d[:, 1]
+        poly_z_values = (a * x + b * y + d) / -c
+        polygon = Poly3DCollection([np.column_stack((polygon_2d, poly_z_values))], alpha=0.5)
+        polygon.set_color(mp_colors.rgb2hex([x / 255.0 for x in [0, 255, 255]]))  # cyan
+        ax.add_collection3d(polygon)
 
     # figure settings
     ax.axis('equal')
