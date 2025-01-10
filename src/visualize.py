@@ -43,6 +43,47 @@ def visualize_image(img: np.ndarray):
     plt.close(fig)
 
 
+def visualize_2d_features_image_overlay(
+        img: np.ndarray,
+        vertices: np.ndarray,
+        edges: np.ndarray,
+        faces: list[list[int]],
+):
+    """
+    Visualize 2D features overlaid onto an image with Pillow
+    """
+    radius = 10  # pixels
+    p_img = Image.fromarray(img)
+    pencil = ImageDraw.Draw(p_img, mode="RGBA")
+
+    # vertices
+    for v in vertices:
+        xy_1 = to_tuple(v - radius)
+        xy_2 = to_tuple(v + radius)
+        pencil.ellipse(xy=[xy_1, xy_2], fill=None, outline="yellow", width=1)
+
+    # edges
+    for e in edges:
+        xy_1 = to_tuple(vertices[e[0], :])
+        xy_2 = to_tuple(vertices[e[1], :])
+        pencil.line(xy=[xy_1, xy_2], fill="yellow", width=0)
+
+    # faces
+    alpha = 60
+    F = len(COLORS)
+    for i, face in enumerate(faces):
+        xys = []
+        for v in face:
+            xys.append(to_tuple(vertices[v, :]))
+        pencil.polygon(xy=xys, fill=tuple(COLORS[i%F] + [alpha]))  # changing transparent colors
+
+    # display
+    p_img.show()
+
+    # cleanup
+    p_img.close()
+
+
 def visualize_point_cloud(
         point_cloud: np.ndarray,
         polygon_2d: np.ndarray = None,
@@ -84,44 +125,3 @@ def visualize_point_cloud(
 
     # cleanup
     plt.close(fig)
-
-
-def visualize_2d_features_image_overlay(
-        img: np.ndarray,
-        vertices: np.ndarray,
-        edges: np.ndarray,
-        faces: list[list[int]],
-):
-    """
-    Visualize 2D features overlaid onto an image with Pillow
-    """
-    radius = 10  # pixels
-    p_img = Image.fromarray(img)
-    pencil = ImageDraw.Draw(p_img, mode="RGBA")
-
-    # vertices
-    for v in vertices:
-        xy_1 = to_tuple(v - radius)
-        xy_2 = to_tuple(v + radius)
-        pencil.ellipse(xy=[xy_1, xy_2], fill=None, outline="yellow", width=1)
-
-    # edges
-    for e in edges:
-        xy_1 = to_tuple(vertices[e[0], :])
-        xy_2 = to_tuple(vertices[e[1], :])
-        pencil.line(xy=[xy_1, xy_2], fill="yellow", width=0)
-
-    # faces
-    alpha = 60
-    F = len(COLORS)
-    for i, face in enumerate(faces):
-        xys = []
-        for v in face:
-            xys.append(to_tuple(vertices[v, :]))
-        pencil.polygon(xy=xys, fill=tuple(COLORS[i%F] + [alpha]))  # changing transparent colors
-
-    # display
-    p_img.show()
-
-    # cleanup
-    p_img.close()
