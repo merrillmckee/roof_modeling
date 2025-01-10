@@ -60,14 +60,18 @@ def model_roof_planes(
         faces: list[list[int]],
 ) -> list[tuple[float, float, float, float]]:
 
+    roof_planes = []
     for face in faces:
+        # get points within each 2D roof polygon
         face_polygon = vertices[face, :]
         face_points = lasso_points(face_polygon, point_cloud)
 
         plane_ransac = detect_plane_ransac(face_points[:, :3])
+        roof_planes.append(plane_ransac)
 
         # DEBUG: visualize point cloud points within a single face polygon
         visualize_point_cloud(face_points, polygon_2d=face_polygon, plane=plane_ransac)
+    return roof_planes
 
 
 if __name__ == "__main__":
@@ -81,5 +85,7 @@ if __name__ == "__main__":
     vertices_pixels_, _, faces_, ppm_ = read_metadata(data_path_, uid_)
     vertices_ = image_to_world(vertices_pixels_, ppm_, img_.shape[:2])
 
-    # model
+    # model roof planes
     roof_planes_ = model_roof_planes(point_cloud_, vertices_, faces_)
+
+    # visualize roof
