@@ -6,7 +6,6 @@ from PIL import Image, ImageDraw
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from point_cloud_utils import lasso_points
-from typing import Literal
 
 matplotlib.use('MacOSX')
 
