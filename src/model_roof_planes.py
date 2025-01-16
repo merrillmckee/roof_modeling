@@ -6,7 +6,7 @@ from typing import Literal
 from file_utils import read_image, read_metadata, read_ply
 from planar_regression import standardize_plane_np, planar_regression_lstsq
 from point_cloud_utils import lasso_points, image_to_world
-from visualize import visualize_roof_model, visualize_point_cloud
+from visualize import visualize_roof_model, visualize_point_cloud, visualize_roof_planes, visualize_roof_points
 
 
 def detect_plane_ransac(points: np.ndarray) -> tuple[float, float, float, float]:
@@ -47,7 +47,7 @@ def model_roof_planes(
         roof_planes.append(plane)
 
         # DEBUG: visualize point cloud points within a single face polygon
-        visualize_point_cloud(face_points, polygon_2d=face_polygon, plane=plane)
+        # visualize_point_cloud(face_points, polygon_2d=face_polygon, plane=plane)
     return roof_planes
 
 
@@ -66,10 +66,24 @@ if __name__ == "__main__":
     roof_planes_ransac_ = model_roof_planes(point_cloud_, vertices_, faces_, algorithm="ransac")
 
     # model roof planes with least squares fit
-    # roof_planes_lstsq_ = model_roof_planes(point_cloud_, vertices_, faces_, algorithm="least_squares")
+    roof_planes_lstsq_ = model_roof_planes(point_cloud_, vertices_, faces_, algorithm="least_squares")
 
     # visualize roof
     polygons_2d_ = []
     for face_ in faces_:
         polygons_2d_.append(vertices_[face_, :])
-    visualize_roof_model(point_cloud_, polygons_2d_, roof_planes_ransac_)
+
+    #
+    visualize_roof_points(point_cloud_, polygons_2d_)
+
+    #
+    visualize_roof_planes(point_cloud_, polygons_2d_, roof_planes_lstsq_, title="Least squares")
+
+    #
+    visualize_roof_planes(point_cloud_, polygons_2d_, roof_planes_ransac_, title="RANSAC")
+
+    # RANSAC
+    visualize_roof_model(point_cloud_, polygons_2d_, roof_planes_ransac_, title="RANSAC")
+
+    # least squares
+    # visualize_roof_model(point_cloud_, polygons_2d_, roof_planes_lstsq_, title="Least squares")

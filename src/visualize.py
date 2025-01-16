@@ -54,7 +54,7 @@ def visualize_2d_features_image_overlay(
     """
     Visualize 2D features overlaid onto an image with Pillow
     """
-    radius = 10  # pixels
+    radius = 5  # pixels
     p_img = Image.fromarray(img)
     pencil = ImageDraw.Draw(p_img, mode="RGBA")
 
@@ -129,30 +129,104 @@ def visualize_point_cloud(
     plt.close(fig)
 
 
+def visualize_roof_points(
+        point_cloud: np.ndarray,
+        polygons_2d: list[np.ndarray],
+):
+    """
+    Visualize roof points with original point cloud
+    """
+
+    for polygon_2d in polygons_2d:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        # face points
+        face_points = lasso_points(polygon_2d, point_cloud)
+
+        # points
+        x = face_points[:, 0]
+        y = face_points[:, 1]
+        z = face_points[:, 2]  # (a * x + b * y + d) / -c
+        colors = face_points[:, 6:9] / 255.0
+        ax.scatter3D(x, y, z, c=colors, s=2.5)
+
+        # figure settings
+        fig.set_size_inches((11, 11), forward=True)
+        ax.axis('equal')
+        ax.axis('off')
+        fig.tight_layout()
+        plt.title("", y=1.05)
+        plt.show()
+
+        # cleanup
+        plt.close(fig)
+
+
+def visualize_roof_planes(
+        point_cloud: np.ndarray,
+        polygons_2d: list[np.ndarray],
+        planes: list[tuple[float, float, float, float]],
+        title: str = "",
+):
+    """
+    Visualize roof planes with original point cloud
+    """
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+
+    for polygon_2d, plane in zip(polygons_2d, planes):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        # face points
+        face_points = lasso_points(polygon_2d, point_cloud)
+
+        # plane_1 as a 2D polygon
+        a, b, c, d = plane  # 3D plane equation:  ax + by + cz + d = 0
+        x, y = polygon_2d[:, 0], polygon_2d[:, 1]
+        poly_z_values = (a * x + b * y + d) / -c
+        polygon = Poly3DCollection([np.column_stack((polygon_2d, poly_z_values))], alpha=0.3)
+        polygon.set_color(mp_colors.rgb2hex([x / 255.0 for x in [0, 255, 255]]))  # cyan
+        ax.add_collection3d(polygon)
+
+        # ax.scatter(x, y, z, c=colors)
+
+        # points
+        x = face_points[:, 0]
+        y = face_points[:, 1]
+        z = face_points[:, 2]  # (a * x + b * y + d) / -c
+        colors = face_points[:, 6:9] / 255.0
+        ax.scatter3D(x, y, z, c=colors, s=2.5)
+
+        # figure settings
+        fig.set_size_inches((11, 11), forward=True)
+        ax.axis('equal')
+        ax.axis('off')
+        fig.tight_layout()
+        plt.title("", y=1.05)
+        ax.legend([title])
+        plt.show()
+
+        # cleanup
+        plt.close(fig)
+
+
 def visualize_roof_model(
         point_cloud: np.ndarray,
         polygons_2d: list[np.ndarray],
         planes: list[tuple[float, float, float, float]],
+        title: str = "",
 ):
     """
-    Visualize a 3D point cloud with matplotlib
+    Visualize a 3D roof model
     """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
     for polygon_2d, plane in zip(polygons_2d, planes):
-        # face points
         face_points = lasso_points(polygon_2d, point_cloud)
-
-        # 2D polygon (turned off for now)
-        a, b, c, d = plane  # 3D plane equation:  ax + by + cz + d = 0
-        x, y = polygon_2d[:, 0], polygon_2d[:, 1]
-        poly_z_values = (a * x + b * y + d) / -c
-        polygon = Poly3DCollection([np.column_stack((polygon_2d, poly_z_values))], alpha=0.1)
-        polygon.set_color(mp_colors.rgb2hex([x / 255.0 for x in [0, 255, 255]]))  # cyan
-        # ax.add_collection3d(polygon)
-
-        # points
+        a, b, c, d = plane
         x = face_points[:, 0]
         y = face_points[:, 1]
         z = (a * x + b * y + d) / -c
@@ -160,9 +234,11 @@ def visualize_roof_model(
         ax.scatter3D(x, y, z, c=colors, s=0.1)
 
     # figure settings
+    fig.set_size_inches((11, 11), forward=True)
     ax.axis('equal')
     ax.axis('off')
     fig.tight_layout()
+    plt.title(title)
     plt.show()
 
     # cleanup
